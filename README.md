@@ -139,5 +139,5 @@ pip3 show numpy scipy mido madmom ffmpeg
 
 By following these steps, SureBeat should be installed and fully functional in DaVinci Resolve on macOS!
 
-ureBeat is provided “as-is” without warranty of any kind, express or implied. Mansi Visuals is not liable for any claims or damages arising from the use of this software or it's dependencies.
+SureBeat is provided “as-is” without warranty of any kind, express or implied. Mansi Visuals is not liable for any claims or damages arising from the use of this software or it's dependencies.
 
