@@ -118,7 +118,7 @@ function main()
         Geometry = {100, 100, 500, 400},
         ui:VGroup{
             ID = "root",
-            ui:Label{Text = "<b>SureBeat v1.0.0</b>", Alignment = {AlignHCenter = true}, StyleSheet = "font-size: 14px; color: white; padding-bottom: 12px;"},
+            ui:Label{Text = "<b>SureBeat v1.0.1</b>", Alignment = {AlignHCenter = true}, StyleSheet = "font-size: 14px; color: white; padding-bottom: 12px;"},
             ui:Label{Text = "SureBeat helps you edit to the beat of your audio!", Alignment = {AlignHCenter = true }, StyleSheet = "font-size: 12px; color: white;"},
             ui:HGroup{
                 ui:Label{Text = "Audio File:", MinimumSize = {40, 15}, Alignment = {AlignRight = true}, StyleSheet = "font-size: 12px; color: white;"},
