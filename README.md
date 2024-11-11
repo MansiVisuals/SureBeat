@@ -53,6 +53,12 @@ https://ffmpeg.org/download.html / https://evermeet.cx/ffmpeg/ download the bina
 brew install ffmpeg
 ```
 
+If you choose to download the binary from this repo or the ffmpeg website you could codesign it. So it doesn't give you security message regarding not being able to check for malware and untrusted file:
+
+```
+codesign --force --deep --sign - </path/to/your/binary>
+```
+
 1.3 Install Python Packages and madmom
 
 SureBeat requires the madmom library, along with additional libraries like numpy, scipy, and mido.
