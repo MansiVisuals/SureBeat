@@ -45,7 +45,7 @@ ffmpeg -version
 
 2.	Install FFmpeg (if needed):
    
-	•	Download from the official FFmpeg website (recommended), or alternativly install with Homebrew:
+	•	Download from the official FFmpeg website or from this repo (ffmpeg-117676-g87068b9600.7z) (recommended), or alternativly install with Homebrew:
  
 https://ffmpeg.org/download.html / https://evermeet.cx/ffmpeg/ download the binary for macOS from the website and place into /usr/local/bin
 
