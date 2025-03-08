@@ -1,0 +1,2 @@
+macOS/SureBeat[[:space:]]Audio[[:space:]]Engine/SureBeat filter=lfs diff=lfs merge=lfs -text
+Windows/SureBeat[[:space:]]Audio[[:space:]]Engine/SureBeat.exe filter=lfs diff=lfs merge=lfs -text
