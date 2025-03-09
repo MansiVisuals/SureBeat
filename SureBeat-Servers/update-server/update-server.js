@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,8 +11,15 @@ const VERSIONS_DIR = path.join(__dirname, "versions");
 const API_KEY = "9boChvISunRQvGG63Kz7jVfpwTT24X+7MMf5KovHFnE=";
 const FILE_NAME = "SureBeat_main.luac";
 
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: "Too many requests, please try again later."
+});
+
 app.use(helmet());
 app.use(cors());
+app.use(limiter);
 
 // Middleware to check API key
 app.use((req, res, next) => {
