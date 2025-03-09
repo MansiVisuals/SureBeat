@@ -1,4 +1,6 @@
 const apiUrl = '/api/licenses';
+const apiBaseUrl = '/api';
+let activeTab = 'licenses';
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM elements
@@ -14,6 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
     const modalClose = document.getElementById('modalClose');
+
+    // Initialize Bootstrap tabs
+    const tabEls = document.querySelectorAll('a[data-bs-toggle="tab"]')
+    tabEls.forEach(tabEl => {
+        tabEl.addEventListener('shown.bs.tab', event => {
+            activeTab = event.target.getAttribute('href').substring(1);
+            
+            // Load content based on active tab
+            if (activeTab === 'licenses') {
+                loadLicenses();
+            } else if (activeTab === 'trials') {
+                loadTrials();
+            }
+        });
+    });
 
     // Check authentication status
     function checkAuth() {
@@ -93,6 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLicenses();
     document.getElementById('addLicenseForm').addEventListener('submit', addLicense);
     document.getElementById('removeLicenseForm').addEventListener('submit', removeLicense);
+
+    // UI Event Listeners for Common Controls
+    setupCommonEventListeners();
+
+    // Load initial data
+    loadLicenses();
 });
 
 function loadLicenses() {
@@ -164,3 +187,138 @@ function expireLicense(id) {
     })
     .catch(error => console.error('Error expiring license:', error));
 }
+
+// Format date helper
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+    
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+// Show loading state
+const showLoading = (isLoading) => {
+    const loadingEl = document.getElementById(activeTab + 'TableLoading');
+    if (loadingEl) {
+        loadingEl.classList.toggle('d-none', !isLoading);
+    }
+};
+
+// Show error message
+const showError = (message) => {
+    // Create a toast notification or alert
+    alert(message);
+};
+
+// Show success message
+const showSuccess = (message) => {
+    // Create a toast notification or alert
+    alert(message);
+};
+
+// Copy text to clipboard
+const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            showSuccess('Copied to clipboard');
+        })
+        .catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+};
+
+// Set up common event listeners
+const setupCommonEventListeners = () => {
+    // Backup database
+    const backupDbBtn = document.getElementById('backupDatabase');
+    if (backupDbBtn) {
+        backupDbBtn.addEventListener('click', () => {
+            fetch(`${apiBaseUrl}/settings/backup`, {
+                method: 'POST'
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `license-db-backup-${new Date().toISOString().slice(0, 10)}.db`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showSuccess('Database backup downloaded successfully');
+            })
+            .catch(error => {
+                console.error('Error backing up database:', error);
+                showError('Failed to backup database');
+            });
+        });
+    }
+
+    // Restore database
+    const restoreDbBtn = document.getElementById('restoreDatabase');
+    if (restoreDbBtn) {
+        restoreDbBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.db';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('database', file);
+                
+                fetch(`${apiBaseUrl}/settings/restore`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess('Database restored successfully');
+                        // Reload data
+                        loadLicenses();
+                        loadTrials();
+                    } else {
+                        showError(data.message || 'Failed to restore database');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error restoring database:', error);
+                    showError('Failed to restore database');
+                });
+            };
+            input.click();
+        });
+    }
+};
+
+// Generate a random license key
+const generateRandomLicenseKey = () => {
+    const parts = [];
+    for (let i = 0; i < 5; i++) {
+        let part = '';
+        for (let j = 0; j < 5; j++) {
+            part += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)];
+        }
+        parts.push(part);
+    }
+    return parts.join('-');
+};
+
+// Helper for license status display
+const getLicenseStatus = (license) => {
+    if (!license.mac_uid) {
+        return '<span class="badge badge-pending">Not activated</span>';
+    }
+    return '<span class="badge badge-success">Active</span>';
+};

@@ -1,31 +1,266 @@
+/license_manager/public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>License Manager</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>SureBeat License Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <header>
-        <h1>License Manager</h1>
-    </header>
-    <main>
-        <section id="license-management">
-            <h2>Manage Licenses</h2>
-            <div id="license-form-container"></div>
-            <div id="license-table-container"></div>
-        </section>
-        <section id="trial-management">
-            <h2>Manage Trials</h2>
-            <div id="trial-table-container"></div>
-        </section>
-    </main>
-    <script src="js/app.js"></script>
-    <script src="js/licenses.js"></script>
-    <script src="js/trials.js"></script>
-    <script src="components/licenseForm.js"></script>
-    <script src="components/licenseTable.js"></script>
-    <script src="components/trialTable.js"></script>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4>SureBeat</h4>
+                        <h5>License Manager</h5>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#licenses" data-bs-toggle="tab">
+                                <i class="fas fa-key me-2"></i>
+                                Licenses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#trials" data-bs-toggle="tab">
+                                <i class="fas fa-clock me-2"></i>
+                                Trials
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#settings" data-bs-toggle="tab">
+                                <i class="fas fa-cog me-2"></i>
+                                Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="tab-content" id="mainContent">
+                    <!-- Licenses Tab -->
+                    <div class="tab-pane fade show active" id="licenses">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1>License Management</h1>
+                            <div class="btn-toolbar mb-2 mb-md-0">
+                                <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addLicenseModal">
+                                    <i class="fas fa-plus me-1"></i> Add License
+                                </button>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#generateLicenseModal">
+                                    <i class="fas fa-magic me-1"></i> Generate License
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Search and filters -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" id="licenseSearch" class="form-control" placeholder="Search by email or license key...">
+                                    <button id="clearLicenseSearch" class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary filter-btn active" data-filter="all">All</button>
+                                    <button type="button" class="btn btn-outline-secondary filter-btn" data-filter="active">Active</button>
+                                    <button type="button" class="btn btn-outline-secondary filter-btn" data-filter="inactive">Inactive</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Licenses table -->
+                        <div class="table-responsive license-table-container">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Email</th>
+                                        <th>License Key</th>
+                                        <th>Issue Date</th>
+                                        <th>MAC/UID</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="licenseTableBody">
+                                    <!-- License rows will be added here dynamically -->
+                                </tbody>
+                            </table>
+                            
+                            <div id="licenseTableLoading" class="text-center my-4 d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="licenseTableEmpty" class="text-center my-4 d-none">
+                                <p class="text-muted">No licenses found</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trials Tab -->
+                    <div class="tab-pane fade" id="trials">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1>Trial Management</h1>
+                        </div>
+                        
+                        <!-- Trials search -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" id="trialSearch" class="form-control" placeholder="Search by MAC/UID...">
+                                    <button id="clearTrialSearch" class="btn btn-outline-secondary" type="button">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trials table -->
+                        <div class="table-responsive trial-table-container">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>MAC/UID</th>
+                                        <th>Start Date</th>
+                                        <th>Remaining Days</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trialTableBody">
+                                    <!-- Trial rows will be added here dynamically -->
+                                </tbody>
+                            </table>
+                            
+                            <div id="trialTableLoading" class="text-center my-4 d-none">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="trialTableEmpty" class="text-center my-4 d-none">
+                                <p class="text-muted">No trials found</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="tab-pane fade" id="settings">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1>Settings</h1>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Database Settings</h5>
+                                <div class="mb-3">
+                                    <button id="backupDatabase" class="btn btn-primary">
+                                        <i class="fas fa-download me-1"></i> Backup Database
+                                    </button>
+                                    <button id="restoreDatabase" class="btn btn-warning ms-2">
+                                        <i class="fas fa-upload me-1"></i> Restore Database
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add License Modal -->
+    <div class="modal fade" id="addLicenseModal" tabindex="-1" aria-labelledby="addLicenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLicenseModalLabel">Add License</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addLicenseForm">
+                        <div class="mb-3">
+                            <label for="addEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="addEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addLicenseKey" class="form-label">License Key</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="addLicenseKey" required>
+                                <button class="btn btn-outline-secondary" type="button" id="generateKeyBtn">Generate</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="addLicenseSubmitBtn">Add License</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate License Modal -->
+    <div class="modal fade" id="generateLicenseModal" tabindex="-1" aria-labelledby="generateLicenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="generateLicenseModalLabel">Generate License</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="generateLicenseForm">
+                        <div class="mb-3">
+                            <label for="generateEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="generateEmail" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="generateLicenseSubmitBtn">Generate License</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View License Modal -->
+    <div class="modal fade" id="viewLicenseModal" tabindex="-1" aria-labelledby="viewLicenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewLicenseModalLabel">License Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="viewLicenseDetails">
+                    <!-- License details will be displayed here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/app.js"></script>
+    <script src="/js/licenses.js"></script>
+    <script src="/js/trials.js"></script>
 </body>
 </html>

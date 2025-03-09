@@ -1,14 +1,17 @@
 :root {
-    --primary-color: #2563eb;
+    --primary-color: #0d6efd;
     --primary-hover: #1d4ed8;
-    --secondary-color: #475569;
+    --secondary-color: #6c757d;
     --secondary-hover: #334155;
-    --success-color: #16a34a;
+    --success-color: #198754;
     --success-hover: #15803d;
-    --danger-color: #dc2626;
+    --danger-color: #dc3545;
     --danger-hover: #b91c1c;
-    --warning-color: #ca8a04;
+    --warning-color: #ffc107;
     --warning-hover: #a16207;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
     --background: #f8fafc;
     --surface: #ffffff;
     --text-primary: #1e293b;
@@ -27,7 +30,8 @@
 }
 
 body {
-    background-color: var(--background);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f5f5f5;
     color: var(--text-primary);
     line-height: 1.6;
 }
@@ -180,6 +184,13 @@ input[type="submit"]:hover {
 }
 
 .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
     width: 240px;
     background-color: var(--surface);
     box-shadow: var(--shadow);
@@ -211,6 +222,23 @@ input[type="submit"]:hover {
 
 .sidebar i {
     width: 20px;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: var(--primary-color);
+    background-color: rgba(13, 110, 253, 0.1);
 }
 
 #mainContent {
@@ -299,28 +327,59 @@ input[type="submit"]:hover {
     gap: 0.5rem;
 }
 
+.license-table-container, .trial-table-container {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.text-truncate {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Actions cell */
+.actions-cell {
+    white-space: nowrap;
+}
+
 /* Status badges */
 .badge {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 50px;
-    font-size: 0.75rem;
+    padding: 0.4em 0.65em;
+    font-size: 0.85em;
     font-weight: 500;
+    border-radius: 50px;
 }
 
 .badge-success {
-    background-color: rgba(22, 163, 74, 0.1);
-    color: var(--success-color);
+    background-color: var(--success-color);
+    color: white;
 }
 
 .badge-pending {
-    background-color: rgba(202, 138, 4, 0.1);
-    color: var(--warning-color);
+    background-color: var(--secondary-color);
+    color: white;
 }
 
 .badge-inactive {
     background-color: rgba(220, 38, 38, 0.1);
     color: var(--danger-color);
+}
+
+.badge-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.badge-warning {
+    background-color: var(--warning-color);
+    color: black;
 }
 
 /* Loading & Empty States */
@@ -346,4 +405,46 @@ input[type="submit"]:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    background-color: var(--light-color);
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* License details */
+.license-detail-row {
+    display: flex;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.license-detail-label {
+    flex: 1;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.license-detail-value {
+    flex: 2;
+    word-break: break-all;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        padding-top: 1rem;
+    }
+
+    main {
+        padding-top: 1rem;
+    }
+
+    .license-table-container, .trial-table-container {
+        max-height: none;
+    }
+}
