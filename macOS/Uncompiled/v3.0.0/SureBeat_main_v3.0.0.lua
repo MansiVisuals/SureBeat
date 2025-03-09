@@ -1135,7 +1135,7 @@ function detect_beat_and_tempo(audio_path)
     if not success then
         print("[SureBeat] ERROR: The SureBeat binary did not run successfully (exit code: " .. tostring(exit_code) .. ").")
         print("[SureBeat] Possible reasons:")
-        print("  - The SureBeat file is not executable or missing (check chmod +x).")
+        print("  - The SureBeat file is not executable or missing (check manual or contact support for help).")
         return {}, {}
     end
 
