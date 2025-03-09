@@ -52,7 +52,7 @@ license-management-app
    ```
    npm start
    ```
-2. Open your web browser and navigate to `http://localhost:3000` to access the License Management App.
+2. Open your web browser and navigate to `http://localhost:6000` to access the License Management App.
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
