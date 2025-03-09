@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
-const config = require('./config');
+const config = require('../config'); // Updated path
 
 const app = express();
 const PORT = process.env.PORT || 6000;
