@@ -24,6 +24,11 @@ app.use(express.static(path.join(__dirname, '../../public')));
 const licenseRoutes = require('./routes/licenseRoutes');
 app.use('/api/licenses', licenseRoutes);
 
+// Add a route for the root URL
+app.get('/', (req, res) => {
+    res.send('Welcome to the License Management App');
+});
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
