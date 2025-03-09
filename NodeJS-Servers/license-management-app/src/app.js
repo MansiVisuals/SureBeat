@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const licenseRoutes = require('./routes/licenseRoutes');
 const sqlite3 = require('sqlite3').verbose();
 const config = require('./config');
 
@@ -22,6 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../../public')));
 
 // Routes
+const licenseRoutes = require('./routes/licenseRoutes')(db);
 app.use('/api/licenses', licenseRoutes);
 
 // Start the server
