@@ -318,3 +318,4 @@ function getRemainingTrialDays(startDate) {
 
 // Start the menu
 displayMenu();
+
