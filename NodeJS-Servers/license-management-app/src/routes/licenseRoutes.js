@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const LicenseController = require('../controllers/licenseController');
-
-const licenseController = new LicenseController();
+const licenseController = require('../controllers/licenseController');
 
 // Route to list all licenses
 router.get('/licenses', licenseController.listLicenses.bind(licenseController));
@@ -17,7 +15,7 @@ router.put('/licenses/expire', licenseController.expireLicense.bind(licenseContr
 router.put('/licenses/reset', licenseController.resetLicense.bind(licenseController));
 
 // Route to filter activated licenses
-router.get('/licenses/activated', licenseController.listActivatedLicenses.bind(licenseController));
+router.get('/licenses/activated', licenseController.listActivatedLicenses);
 
 // Route to filter non-activated licenses
 router.get('/licenses/non-activated', licenseController.listNonActivatedLicenses.bind(licenseController));

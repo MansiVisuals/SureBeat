@@ -1,3 +1,14 @@
+const sqlite3 = require('sqlite3').verbose();
+const config = require('../config');
+
+const db = new sqlite3.Database(config.databasePath, (err) => {
+    if (err) {
+        console.error('Could not connect to database', err);
+    } else {
+        console.log('Connected to database');
+    }
+});
+
 class LicenseController {
     constructor(db) {
         this.db = db;
@@ -78,6 +89,17 @@ class LicenseController {
         } catch (error) {
             res.status(500).json({ error: 'Error retrieving licenses' });
         }
+    }
+
+    listActivatedLicenses(req, res) {
+        const query = 'SELECT * FROM licenses WHERE macaddress IS NOT NULL';
+        this.db.all(query, [], (err, rows) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({ data: rows });
+        });
     }
 }
 
