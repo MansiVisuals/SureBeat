@@ -19,7 +19,7 @@ const db = new sqlite3.Database(config.databasePath, (err) => {
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../../public')));
 
 // Routes
 app.use('/api/licenses', licenseRoutes);
