@@ -1,6 +1,95 @@
 const apiUrl = '/api/licenses';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM elements
+    const loginContainer = document.getElementById('loginContainer');
+    const appContent = document.getElementById('appContent');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const usernameDisplay = document.getElementById('username');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const sidebarItems = document.querySelectorAll('.sidebar li');
+    const contentTabs = document.querySelectorAll('.content-tab');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalClose = document.getElementById('modalClose');
+
+    // Check authentication status
+    function checkAuth() {
+        const token = localStorage.getItem('token');
+        
+        if (token) {
+            // Show app content, hide login
+            loginContainer.classList.add('hidden');
+            appContent.classList.remove('hidden');
+            
+            // Display username
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user && user.username) {
+                usernameDisplay.textContent = user.username;
+            } else {
+                usernameDisplay.textContent = 'Admin';
+            }
+            
+            // Initialize app data (load licenses, trials, etc.)
+            initializeAppData();
+        } else {
+            // Show login, hide app content
+            loginContainer.classList.remove('hidden');
+            appContent.classList.add('hidden');
+        }
+    }
+
+    // Handle login form submission
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: usernameInput.value,
+                    password: passwordInput.value,
+                }),
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Store token and user info
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify({ username: usernameInput.value }));
+                
+                // Reset form
+                loginForm.reset();
+                loginError.textContent = '';
+                
+                // Check auth status (will show app content)
+                checkAuth();
+            } else {
+                loginError.textContent = data.message || 'Invalid credentials';
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            loginError.textContent = 'An error occurred. Please try again.';
+        }
+    });
+
+    // Handle logout
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        checkAuth();
+    });
+
+    checkAuth();
     loadLicenses();
     document.getElementById('addLicenseForm').addEventListener('submit', addLicense);
     document.getElementById('removeLicenseForm').addEventListener('submit', removeLicense);
