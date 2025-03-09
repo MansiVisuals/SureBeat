@@ -160,6 +160,11 @@ When enabled, this setting provides two powerful features:
 - Select from 16 different colors for both tempo and beat markers
 - **Tip:** Choose contrasting colors to easily distinguish between different marker types
 
+### Saving and Managing Settings
+- **Save Settings**: Click the "Save Settings" button to store your current configuration locally
+- **Load Settings**: Your saved settings will automatically load each time you start SureBeat
+- **Reset to Default**: Click "Reset Settings" to restore factory default configuration
+- **Use case**: Save time by preserving your preferred marker colors, beat patterns, and analysis preferences between sessions
 ## Understanding Beat vs Tempo Markers
 
 ### Beat Markers
