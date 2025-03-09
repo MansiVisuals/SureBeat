@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Management App</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>License Management System</h1>
+        </header>
+        <nav>
+            <ul>
+                <li><button id="list-licenses">List Licenses</button></li>
+                <li><button id="add-license">Add License</button></li>
+                <li><button id="expire-license">Expire License</button></li>
+                <li><button id="reset-license">Reset License</button></li>
+                <li><button id="filter-activated">Filter Activated Licenses</button></li>
+                <li><button id="filter-non-activated">Filter Non-Activated Licenses</button></li>
+            </ul>
+        </nav>
+        <main>
+            <section id="license-list">
+                <h2>All Licenses</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>License Key</th>
+                            <th>MAC UID</th>
+                            <th>Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="license-table-body">
+                        <!-- License entries will be populated here -->
+                    </tbody>
+                </table>
+            </section>
+            <section id="add-license-form" class="hidden">
+                <h2>Add License</h2>
+                <form>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                    <label for="license-key">License Key:</label>
+                    <input type="text" id="license-key" required>
+                    <button type="submit">Add License</button>
+                </form>
+            </section>
+            <section id="expire-license-form" class="hidden">
+                <h2>Expire License</h2>
+                <form>
+                    <label for="expire-id">License ID:</label>
+                    <input type="text" id="expire-id" required>
+                    <button type="submit">Expire License</button>
+                </form>
+            </section>
+            <section id="reset-license-form" class="hidden">
+                <h2>Reset License</h2>
+                <form>
+                    <label for="reset-identifier">Email or License Key:</label>
+                    <input type="text" id="reset-identifier" required>
+                    <button type="submit">Reset License</button>
+                </form>
+            </section>
+        </main>
+        <footer>
+            <p>&copy; 2023 License Management App</p>
+        </footer>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>
