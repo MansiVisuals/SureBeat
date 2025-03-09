@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../../public')));
 
 // Routes
-const licenseRoutes = require('./routes/licenseRoutes')(db);
+const licenseRoutes = require('./routes/licenseRoutes');
 app.use('/api/licenses', licenseRoutes);
 
 // Start the server
