@@ -165,6 +165,7 @@ When enabled, this setting provides two powerful features:
 - **Load Settings**: Your saved settings will automatically load each time you start SureBeat
 - **Reset to Default**: Click "Reset Settings" to restore factory default configuration
 - **Use case**: Save time by preserving your preferred marker colors, beat patterns, and analysis preferences between sessions
+
 ## Understanding Beat vs Tempo Markers
 
 ### Beat Markers
