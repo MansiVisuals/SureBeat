@@ -161,25 +161,46 @@ function generateLicenseKey() {
     return parts.join('-');
 }
 
-// Generate and add a license
+// Generate and add a license with duplicate prevention
 function generateAndAddLicense() {
     rl.question('Enter email: ', (email) => {
-        const licenseKey = generateLicenseKey();
-        const encryptedEmail = encrypt(email);
-        const encryptedLicenseKey = encrypt(licenseKey);
-        const issueDate = new Date().toISOString();
-        db.run(
-            'INSERT INTO Licenses (email, license_key, issue_date) VALUES (?, ?, ?)',
-            [encryptedEmail, encryptedLicenseKey, issueDate],
-            (err) => {
-                if (err) {
-                    console.error('Error adding license:', err.message);
-                } else {
-                    console.log(`License generated and added successfully. License Key: ${licenseKey}`);
+        // Generate a unique license key
+        generateUniqueLicenseKey((licenseKey) => {
+            const encryptedEmail = encrypt(email);
+            const encryptedLicenseKey = encrypt(licenseKey);
+            const issueDate = new Date().toISOString();
+            db.run(
+                'INSERT INTO Licenses (email, license_key, issue_date) VALUES (?, ?, ?)',
+                [encryptedEmail, encryptedLicenseKey, issueDate],
+                (err) => {
+                    if (err) {
+                        console.error('Error adding license:', err.message);
+                    } else {
+                        console.log(`License generated and added successfully. License Key: ${licenseKey}`);
+                    }
+                    displayMenu();
                 }
-                displayMenu();
-            }
-        );
+            );
+        });
+    });
+}
+
+// Helper function to generate a unique license key
+function generateUniqueLicenseKey(callback) {
+    const licenseKey = generateLicenseKey();
+    const encryptedLicenseKey = encrypt(licenseKey);
+    
+    // Check if this key already exists in the database
+    db.get('SELECT COUNT(*) as count FROM Licenses WHERE license_key = ?', [encryptedLicenseKey], (err, row) => {
+        if (err) {
+            console.error('Error checking license key:', err.message);
+            callback(licenseKey); // Proceed anyway in case of database error
+        } else if (row.count > 0) {
+            console.log('Generated duplicate key, trying again...');
+            generateUniqueLicenseKey(callback); // Try again with a new key
+        } else {
+            callback(licenseKey); // This key is unique, proceed
+        }
     });
 }
 
