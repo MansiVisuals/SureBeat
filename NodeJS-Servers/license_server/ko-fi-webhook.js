@@ -89,7 +89,7 @@ transporter.verify((error, success) => {
 });
 
 // Function to send license email via iCloud SMTP
-async function sendLicenseEmail(email, licenseKey) {
+async function sendLicenseEmail(email, licenseKey, orderUrl) {
     const mailOptions = {
         from: EMAIL_SENDER,
         to: email,
@@ -158,6 +158,8 @@ async function sendLicenseEmail(email, licenseKey) {
         </div>
 
         <p>Please note: This license key is valid for macOS and Windows, but one device at a time.</p>
+        
+        <p>Your order details: <a href="${orderUrl}">${orderUrl}</a></p>
         
         <p>If you have any questions, need assistance, or require support, feel free to reach out to us at surebeat@mansivisuals.com.</p>
         
@@ -311,22 +313,46 @@ async function sendOrderNotificationEmail(orderData) {
 
 // Function to send purchase confirmation email for non-license products
 async function sendPurchaseConfirmationEmail(email, customerName, orderData) {
-    // Get product details
-    let productDetails = { name: 'Unknown Product', isLicense: false, version: 'unknown' };
-    let productCode = '';
+    // Get all purchased products
+    let purchasedItems = [];
+    let containsLicense = false;
+    let recommendLatestVersion = false;
     
     if (orderData.shop_items && orderData.shop_items.length > 0) {
-        productCode = orderData.shop_items[0].direct_link_code;
-        productDetails = getProductDetails(productCode);
+        // Process all items in the order
+        orderData.shop_items.forEach(item => {
+            const productDetails = getProductDetails(item.direct_link_code);
+            purchasedItems.push({
+                ...productDetails,
+                quantity: item.quantity || 1,
+                code: item.direct_link_code
+            });
+            
+            // Check if any item is a license
+            if (productDetails.isLicense) {
+                containsLicense = true;
+            }
+            
+            // Check if we should recommend an upgrade (any older version purchased)
+            if (item.direct_link_code !== '14a81d5424' && !productDetails.isLicense) {
+                recommendLatestVersion = true;
+            }
+        });
     }
     
-    // Determine if we should recommend the latest version
-    const shouldRecommendUpgrade = productCode !== '14a81d5424' && !productDetails.isLicense;
+    const orderUrl = orderData.url || '#';
+    
+    // Generate HTML for products list
+    const productsHtml = purchasedItems.map(item => 
+        `<div class="product-item">
+            <strong>${item.name}</strong> (Qty: ${item.quantity})
+        </div>`
+    ).join('');
     
     const mailOptions = {
         from: EMAIL_SENDER,
         to: email,
-        subject: `Thank you for purchasing ${productDetails.name}!`,
+        subject: `Thank you for your SureBeat purchase!`,
         html: `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -362,10 +388,16 @@ async function sendPurchaseConfirmationEmail(email, customerName, orderData) {
             border: 1px solid #ccc;
             padding: 15px;
             font-size: 18px;
-            text-align: center;
             border-radius: 8px;
             margin: 20px 0;
             color: #2c3e50;
+        }
+        .product-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .product-item:last-child {
+            border-bottom: none;
         }
         .upgrade-box {
             background-color: #edf7ed;
@@ -389,20 +421,26 @@ async function sendPurchaseConfirmationEmail(email, customerName, orderData) {
             Thank you for purchasing SureBeat!
         </div>
         <p>Hello ${customerName},</p>
-        <p>Thank you for your purchase of ${productDetails.name}. We hope it helps enhance your creative workflow!</p>
+        <p>Thank you for your purchase. We hope our products help enhance your creative workflow!</p>
         
         <div class="info-box">
-            Your Purchase:<br>
-            ${productDetails.name}<br>
-            Amount: ${orderData.amount} ${orderData.currency}
+            <h3>Your Purchase:</h3>
+            ${productsHtml}
+            <div style="margin-top: 10px; border-top: 1px solid #ccc; padding-top: 10px;">
+                <strong>Total Amount:</strong> ${orderData.amount} ${orderData.currency}
+            </div>
         </div>
         
-        ${shouldRecommendUpgrade ? `
+        <p>Your order details: <a href="${orderUrl}">${orderUrl}</a></p>
+        
+        ${recommendLatestVersion ? `
         <div class="upgrade-box">
             <strong>Looking for the latest version?</strong><br>
-            You've purchased SureBeat v${productDetails.version}. Our newest version is v3.0.0 with improved features and compatibility.<br><br>
+            You've purchased an older version of SureBeat. Our newest version is v3.0.0 with improved features and compatibility.<br><br>
             <a href="https://ko-fi.com/s/14a81d5424">Click here to get SureBeat v3.0.0 for DaVinci Resolve Studio (macOS & Windows)</a>
         </div>` : ''}
+        
+        ${containsLicense ? `<p><strong>Note:</strong> License key(s) will be sent in a separate email.</p>` : ''}
         
         <p>If you have any questions, need assistance, or require support, feel free to reach out to us at surebeat@mansivisuals.com.</p>
         
@@ -423,6 +461,113 @@ async function sendPurchaseConfirmationEmail(email, customerName, orderData) {
         console.log(`✅ Purchase confirmation email sent to ${email}`);
     } catch (error) {
         console.error('❌ Error sending purchase confirmation email:', error);
+    }
+}
+
+// Function to send license generation confirmation to admin
+async function sendLicenseGenerationNotification(email, amount, currency, licenseKey) {
+    const emailSubject = `✅ SureBeat License Generated`;
+    
+    const emailHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SureBeat License Generated</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400&family=Ubuntu:wght@700&display=swap');
+        
+        body {
+            font-family: 'Josefin Sans', sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .license-box {
+            background-color: #f3f4f6;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 130px;
+        }
+        .footer {
+            font-size: 14px;
+            color: #888;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            SureBeat License Generated Successfully
+        </div>
+        
+        <div class="license-box">
+            <div class="detail-row">
+                <div class="detail-label">Amount:</div>
+                <div>${amount} ${currency}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Email:</div>
+                <div>${email}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">License:</div>
+                <div>${licenseKey}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Date:</div>
+                <div>${new Date().toLocaleString()}</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            This is an automated notification from the SureBeat Ko-fi webhook.
+        </div>
+    </div>
+</body>
+</html>`;
+
+    const mailOptions = {
+        from: EMAIL_SENDER,
+        to: NOTIFICATION_EMAIL,
+        subject: emailSubject,
+        html: emailHtml,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log("✅ License generation notification sent to admin");
+    } catch (error) {
+        console.error('❌ Error sending license notification email:', error);
     }
 }
 
@@ -467,7 +612,7 @@ function getProductDetails(directLinkCode) {
 // Ko-fi Webhook Endpoint
 app.post('/ko-fi-webhook', async (req, res) => {
     try {
-        console.log('Webhook received:', req.body);  // Use original logging format
+        console.log('Webhook received:', req.body);
         
         // Handle both JSON and form-encoded formats
         const { data } = req.body;
@@ -494,7 +639,7 @@ app.post('/ko-fi-webhook', async (req, res) => {
             }
         }
 
-        console.log('Parsed Data:', parsedData);  // Match original logging style
+        console.log('Parsed Data:', parsedData);
 
         // Verify Ko-fi token
         if (parsedData.verification_token !== KO_FI_SECRET) {
@@ -505,6 +650,7 @@ app.post('/ko-fi-webhook', async (req, res) => {
         const email = parsedData.email;
         const productId = parsedData.message_id;
         const customerName = parsedData.from_name || 'Customer';
+        const orderUrl = parsedData.url || '';
         
         // Check for missing required fields
         if (!email || !productId) {
@@ -512,40 +658,65 @@ app.post('/ko-fi-webhook', async (req, res) => {
             return res.status(400).send('Missing email or product ID');
         }
 
-        // Send order notification to admin
+        // Send notification email with order details to admin
         await sendOrderNotificationEmail(parsedData);
 
-        // Check if this is a SureBeat license purchase
-        const isLicensePurchase = (productId === 'SureBeat-License-Lifetime' || 
-            (parsedData.shop_items && parsedData.shop_items.some(item => 
-                item.direct_link_code === '2455c69d4d')));
-                
-        if (isLicensePurchase) {
-            // Generate and store the license
-            const licenseKey = generateLicenseKey();
-            const encryptedEmail = encrypt(email);
-            const encryptedLicenseKey = encrypt(licenseKey);
-            const issueDate = new Date().toISOString();
+        // First send general purchase confirmation for all items
+        await sendPurchaseConfirmationEmail(email, customerName, parsedData);
+        
+        // Then check if any of the purchased items is a license and process it
+        let licensePurchased = false;
+        
+        if (parsedData.shop_items && parsedData.shop_items.length > 0) {
+            for (const item of parsedData.shop_items) {
+                // Check if this item is a license product
+                if (item.direct_link_code === '2455c69d4d') {
+                    licensePurchased = true;
+                    
+                    // Process license for each license quantity
+                    const quantity = item.quantity || 1;
+                    for (let i = 0; i < quantity; i++) {
+                        // Generate and store the license
+                        const licenseKey = generateLicenseKey();
+                        const encryptedEmail = encrypt(email);
+                        const encryptedLicenseKey = encrypt(licenseKey);
+                        const issueDate = new Date().toISOString();
 
-            db.run(
-                'INSERT INTO Licenses (email, license_key, issue_date) VALUES (?, ?, ?)',
-                [encryptedEmail, encryptedLicenseKey, issueDate],
-                (err) => {
-                    if (err) {
-                        console.error('Error adding license:', err.message);
-                        return res.status(500).send('Database error');
+                        // Using promises for better async handling
+                        await new Promise((resolve, reject) => {
+                            db.run(
+                                'INSERT INTO Licenses (email, license_key, issue_date) VALUES (?, ?, ?)',
+                                [encryptedEmail, encryptedLicenseKey, issueDate],
+                                async (err) => {
+                                    if (err) {
+                                        console.error('Error adding license:', err.message);
+                                        reject(err);
+                                        return;
+                                    }
+
+                                    console.log(`License generated for ${email}: ${licenseKey}`);
+                                    
+                                    // Send license email to customer with order link
+                                    await sendLicenseEmail(email, licenseKey, orderUrl);
+                                    
+                                    // Send admin notification about successful license generation
+                                    await sendLicenseGenerationNotification(
+                                        email, 
+                                        parsedData.amount, 
+                                        parsedData.currency, 
+                                        licenseKey
+                                    );
+                                    
+                                    resolve();
+                                }
+                            );
+                        });
                     }
-
-                    console.log(`License generated for ${email}: ${licenseKey}`);
-                    sendLicenseEmail(email, licenseKey);
-                    res.status(200).send('License issued successfully');
                 }
-            );
-        } else {
-            // For non-license purchases, send a product purchase confirmation email
-            await sendPurchaseConfirmationEmail(email, customerName, parsedData);
-            res.status(200).send('Purchase processed successfully');
+            }
         }
+
+        res.status(200).send('Order processed successfully');
 
     } catch (error) {
         console.error('Webhook processing error:', error);
